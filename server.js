@@ -27,5 +27,5 @@ app.use('/api/materials', require('./routes/materialRoutes'));
 app.use('/api/borrowings', require('./routes/borrowingRoutes'));
 
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur sur http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
