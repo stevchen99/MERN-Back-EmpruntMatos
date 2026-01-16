@@ -2,10 +2,11 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const setupSwagger = (app, port) => {
-    // 1. Déterminer l'URL (Vercel fournit automatiquement VERCEL_URL en prod)
-    const serverUrl = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : `http://localhost:${port}`;
+    const isProd = process.env.NODE_ENV === 'production';
+    const productionUrl = 'https://mern-back-emprunt-matos.vercel.app';
+    const localUrl = `http://localhost:${port}`;
+
+    const serverUrl = isProd ? productionUrl : localUrl;
 
     const swaggerOptions = {
         definition: {
