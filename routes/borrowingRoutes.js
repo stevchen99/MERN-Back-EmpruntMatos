@@ -37,16 +37,19 @@ router.get('/', async (req, res) => {
  */
 router.post('/add', async (req, res) => {
     try {
-        const { personId, materialId, dureeJours } = req.body;
+        const { personId, materialId, dureeJours, dateEmprunt } = req.body;
 
-        // Calcul de la date de retour : Date actuelle + X jours
-        const dateRetour = new Date();
-        dateRetour.setDate(dateRetour.getDate() + parseInt(dureeJours));
+        // Si dateEmprunt est fournie, on l'utilise, sinon on prend "maintenant"
+        const start = dateEmprunt ? new Date(dateEmprunt) : new Date();
+        
+        const dateRetour = new Date(start);
+        dateRetour.setDate(start.getDate() + parseInt(dureeJours));
 
         const borrowing = new Borrowing({
             personId,
             materialId,
             dureeJours,
+            dateEmprunt: start, // On utilise la date choisie
             dateRetourPrevue: dateRetour
         });
 
