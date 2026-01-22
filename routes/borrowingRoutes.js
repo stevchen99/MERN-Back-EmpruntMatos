@@ -37,15 +37,26 @@ router.get('/', async (req, res) => {
  */
 router.post('/add', async (req, res) => {
     try {
-        // 1. Créer l'emprunt
-        const borrowing = new Borrowing(req.body);
-        await borrowing.save();
+        const { personId, materialId, dureeJours } = req.body;
 
-        // 2. Rendre le matériel indisponible
-        await Material.findByIdAndUpdate(req.body.materialId, { disponible: false });
+        // Calcul de la date de retour : Date actuelle + X jours
+        const dateRetour = new Date();
+        dateRetour.setDate(dateRetour.getDate() + parseInt(dureeJours));
+
+        const borrowing = new Borrowing({
+            personId,
+            materialId,
+            dureeJours,
+            dateRetourPrevue: dateRetour
+        });
+
+        await borrowing.save();
+        await Material.findByIdAndUpdate(materialId, { disponible: false });
 
         res.status(201).json(borrowing);
-    } catch (err) { res.status(400).json(err); }
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 });
 
 /**
