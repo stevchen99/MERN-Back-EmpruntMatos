@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Person = require('../models/Person');
+const Borrowing = require('../models/Borrowing'); 
 
 /**
  * @swagger
@@ -120,9 +121,22 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
-        await Person.findByIdAndDelete(req.params.id);
+        // 1. Vérifier si la personne est liée à un emprunt (rendu ou non)
+        const hasBorrowings = await Borrowing.findOne({ personId: req.params.id });
+        
+        if (hasBorrowings) {
+            return res.status(400).json({ 
+                message: "Suppression impossible : cette personne possède un historique d'emprunt." 
+            });
+        }
+
+        const person = await Person.findByIdAndDelete(req.params.id);
+        if (!person) return res.status(404).json({ message: "Personne non trouvée" });
+        
         res.json({ message: "Supprimé avec succès" });
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 module.exports = router;

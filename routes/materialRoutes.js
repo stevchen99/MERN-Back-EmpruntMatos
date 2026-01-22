@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Material = require('../models/Material');
+const Borrowing = require('../models/Borrowing');
 
 /**
  * @swagger
@@ -140,8 +141,18 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
+        // 1. Vérifier si le matériel est lié à un emprunt
+        const hasBorrowings = await Borrowing.findOne({ materialId: req.params.id });
+        
+        if (hasBorrowings) {
+            return res.status(400).json({ 
+                message: "Suppression impossible : ce matériel est lié à des emprunts." 
+            });
+        }
+
         const material = await Material.findByIdAndDelete(req.params.id);
         if (!material) return res.status(404).json({ message: "Matériel non trouvé" });
+        
         res.json({ message: "Matériel supprimé avec succès" });
     } catch (err) {
         res.status(500).json({ message: err.message });
