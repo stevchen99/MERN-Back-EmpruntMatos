@@ -141,12 +141,15 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
-        // 1. Vérifier si le matériel est lié à un emprunt
-        const hasBorrowings = await Borrowing.findOne({ materialId: req.params.id });
+        // 1. Vérifier si le matériel est actuellement emprunté
+        const activeBorrowing = await Borrowing.findOne({ 
+            materialId: req.params.id,
+            estRendu: { $ne: true } // Bloque si estRendu est false ou absent
+        });
         
-        if (hasBorrowings) {
+        if (activeBorrowing) {
             return res.status(400).json({ 
-                message: "Suppression impossible : ce matériel est lié à des emprunts." 
+                message: "Suppression impossible : ce matériel est actuellement emprunté." 
             });
         }
 
